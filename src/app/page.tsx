@@ -1,6 +1,11 @@
 "use client";
 import { useState } from "react";
-import { useCopilotAction } from "@copilotkit/react-core";
+import {
+  CopilotTask,
+  
+  useCopilotContext,
+  useMakeCopilotReadable,
+} from "@copilotkit/react-core";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +16,7 @@ import {
 import Header from "@/components/header";
 import Sidebar from "@/components/sidebar";
 import PreviewScreen from "@/components/preview-screen";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
   const [code, setCode] = useState<string[]>([
@@ -18,26 +24,37 @@ export default function Home() {
   ]);
   const [codeToDisplay, setCodeToDisplay] = useState<string>(code[0] || "");
   const [showDialog, setShowDialog] = useState<boolean>(false);
+  const [codeCommand, setCodeCommand] = useState<string>("");
 
-  useCopilotAction({
-    name: "generateCode",
-    description: "Create Code Snippet in React.js",
-    parameters: [
+  const readableCode = useMakeCopilotReadable(codeToDisplay);
+
+  const generateCode = new CopilotTask({
+    instructions: codeCommand,
+    actions: [
       {
-        name: "code",
-        type: "string",
-        description: "Code to be generated",
+        name: "generateCode",
+        description: "Create Code Snippet with React.js, tailwindcss.",
+        parameters: [
+          {
+            name: "code",
+            type: "string",
+            description: "Code to be generated",
+            required: true,
+          },
+        ],
+        handler: async ({ code }) => {
+          setCode((prev) => [...prev, code]);
+          setCodeToDisplay(code);
+        },
       },
     ],
-    handler: async (params) => {
-      setCode((prev) => [...prev, params.code]);
-      setCodeToDisplay(params.code);
-    }
   });
 
+  const context = useCopilotContext();
+  
   return (
     <>
-      <main className="bg-white min-h-screen text-black px-4">
+      <main className="bg-white min-h-screen px-4">
         <Header openCode={() => setShowDialog(true)} />
         <div className="w-full h-full min-h-[70vh] flex justify-between gap-x-1 ">
           <Sidebar>
@@ -55,8 +72,23 @@ export default function Home() {
           </Sidebar>
 
           <div className="w-10/12">
-            <PreviewScreen html_code={codeToDisplay} />
+            <PreviewScreen html_code={readableCode || ""} />
           </div>
+        </div>
+        <div className="w-8/12 mx-auto p-1 rounded-full bg-primary flex my-4 outline-0">
+          <Input
+            type="text"
+            placeholder="Enter your code command"
+            className="w-10/12 p-6 rounded-l-full  outline-0 bg-primary text-white"
+            value={codeCommand}
+            onChange={(e) => setCodeCommand(e.target.value)}
+          />
+          <button
+            className="w-2/12 bg-white text-primary rounded-r-full"
+            onClick={() => generateCode.run(context)}
+          >
+            Generate
+          </button>
         </div>
       </main>
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
@@ -68,7 +100,7 @@ export default function Home() {
               application.
             </DialogDescription>
             <div className="p-4 rounded bg-primary text-white my-2">
-              {codeToDisplay}
+              {readableCode}
             </div>
           </DialogHeader>
         </DialogContent>
