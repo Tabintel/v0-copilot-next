@@ -26,7 +26,6 @@ export default function Home() {
   const [showDialog, setShowDialog] = useState<boolean>(false);
   const [codeCommand, setCodeCommand] = useState<string>("");
 
-  // const readableCode = useMakeCopilotReadable(codeToDisplay);
   const readableCode = useMakeCopilotReadable(codeToDisplay);
 
   const generateCode = new CopilotTask({
@@ -73,7 +72,7 @@ export default function Home() {
           </Sidebar>
 
           <div className="w-10/12">
-            <PreviewScreen html_code={readableCode || ""} />
+            <PreviewScreen html_code={codeToDisplay || ""} />
           </div>
         </div>
         <div className="w-8/12 mx-auto p-1 rounded-full bg-primary flex my-4 outline-0">
