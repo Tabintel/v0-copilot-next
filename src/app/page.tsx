@@ -26,6 +26,7 @@ export default function Home() {
   const [showDialog, setShowDialog] = useState<boolean>(false);
   const [codeCommand, setCodeCommand] = useState<string>("");
 
+  // const readableCode = useMakeCopilotReadable(codeToDisplay);
   const readableCode = useMakeCopilotReadable(codeToDisplay);
 
   const generateCode = new CopilotTask({
